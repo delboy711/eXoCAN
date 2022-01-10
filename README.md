@@ -82,7 +82,7 @@ The default endian of the stm32f1 is little.  This may cause problems on an exis
  * 'eXoCAN' was developed to allow the installation of smart sensors and controls in a pre-bells/whistles 1984 VW Vanagon.  
 
  * The Arduino framework was chosen for its ecosystem of existing sensor software.
- * The STM32F103 Blue Pill boards are ideal due to thier low cost($2.00US), processing power and integral CAN engine.
+ * The STM32F103 Blue Pill boards are ideal due to their low cost($2.00US), processing power and integral CAN engine.
  * A big thanks goes out to [JeeLabs](https://jeelabs.org/projects/jeeh/) for the series on CAN using the STM32.  
  * [pazi88](https://github.com/pazi88/8Ch-EGT) has also done a nice job implementing ST's bxCan.
 
@@ -91,4 +91,7 @@ The default endian of the stm32f1 is little.  This may cause problems on an exis
 Written by John Eckert (k2ox).
 BSD license, check license.txt for more information
 All text above must be included in any redistribution.
+
+## Enhancements in this fork
+ * Allows up to 3 messages to sent one after the other by enabling the two unused transmit mailboxes. When sending more than 3 messages put a 10mS pause between groups of 3.
 
