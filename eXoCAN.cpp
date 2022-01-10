@@ -152,32 +152,29 @@ void eXoCAN::filter32Init(int bank, int mode, u_int32_t a, u_int32_t b) //32b fi
 //bool eXoCAN::transmit(int txId, const void *ptr, unsigned int len)
 bool eXoCAN::transmit(int txId, const void *ptr, unsigned int len)
 {
-    //  uint32_t timeout = 10UL, startT = 0;
-    // while (periphBit(tsr, 26) == 0) // tx not ready
-    // {
-    //     //     if(startT == 0)
-    //     //         startT = millis();
-    //     //     if((millis() - startT) > timeout)
-    //     //     {
-    //     //         Serial.println("time out");
-    //     //         return false;
-    //     //     }
-    // }
-    // TME0
-    if (periphBit(tsr, 26) == 0) // tx mailbox 0 not ready)
-        return false;
+    uint8_t mbx = 0x00; //mailbox offset 0=mailbox 0, 0x10=mailbox1, 0x20 = mailbox 2
+    bool mbx_empty = false;
+    uint8_t i;
+    for (i = 0; i<3; i++) {   //Check each mailbox in turn to find an empty one
+        if (periphBit(tsr, 26 + i) == 1)  {
+            mbx_empty = true;
+            mbx= i* 0x10;
+            break;     //Mailbox empty
+        }
+    }
+    if(!mbx_empty) return false;    //No mailbox available try later 
 
     if (_extIDs)
-        MMIO32(ti0r) = (txId << 3)  + 0b100; // // set 29b extended ID.
+        MMIO32(ti0r + mbx) = (txId << 3)  + 0b100; // // set 29b extended ID.
     else
-        MMIO32(ti0r) = (txId << 21) + 0b000; //12b std id
+        MMIO32(ti0r + mbx) = (txId << 21) + 0b000; //12b std id
 
-    MMIO32(tdt0r) = (len << 0);
+    MMIO32(tdt0r + mbx) = (len << 0);
     // this assumes that misaligned word access works
-    MMIO32(tdl0r) = ((const uint32_t *)ptr)[0];
-    MMIO32(tdh0r) = ((const uint32_t *)ptr)[1];
+    MMIO32(tdl0r + mbx) = ((const uint32_t *)ptr)[0];
+    MMIO32(tdh0r + mbx) = ((const uint32_t *)ptr)[1];
 
-    periphBit(ti0r, 0) = 1; // tx request
+    periphBit(ti0r + mbx, 0) = 1; // tx request
     return true;
 }
 
